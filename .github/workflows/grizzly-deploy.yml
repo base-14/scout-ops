@@ -37,15 +37,16 @@ jobs:
           grafana_url: ${{ vars.GRAFANA_URL }}
           grafana_user: admin
           grafana_token: ${{ secrets.GRIZZLY_GRAFANA_TOKEN }}
+          targets: AlertRuleGroup
 
       - name: Show diff
         run: |
-          grr diff ./resources/
+          make diff
 
   apply:
     if: |
       (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply') ||
-      (github.event_name == 'push' && github.ref == 'refs/heads/main')
+      (github.event_name == 'push')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -60,7 +61,8 @@ jobs:
           grafana_url: ${{ vars.GRAFANA_URL }}
           grafana_user: admin
           grafana_token: ${{ secrets.GRIZZLY_GRAFANA_TOKEN }}
+          targets: AlertRuleGroup
 
       - name: Apply changes
         run: |
-          grr apply --output=json --continue-on-error ./resources
+          make push

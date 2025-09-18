@@ -13,6 +13,7 @@ grr config create-context scout
 grr config use-context scout
 grr config set grafana.url "${GRAFANA_URL}"
 grr config set grafana.token "${GRAFANA_TOKEN}"
+grr config set targets AlertRuleGroup
 
 mkdir -p "$RESOURCE_DIR"
 grr pull --output=json --continue-on-error "$RESOURCE_DIR"
