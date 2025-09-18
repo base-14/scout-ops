@@ -1,0 +1,153 @@
+{
+  "apiVersion": "grizzly.grafana.com/v1alpha1",
+  "kind": "AlertRuleGroup",
+  "metadata": {
+    "name": "cerld86lggqv4b.Bender Disk Usage"
+  },
+  "spec": {
+    "folderUid": "cerld86lggqv4b",
+    "interval": 300,
+    "rules": [
+      {
+        "condition": "C",
+        "data": [
+          {
+            "datasourceUid": "ds-scout-altinity-ch",
+            "model": {
+              "adHocFilters": [],
+              "adHocValuesQuery": "",
+              "add_metadata": true,
+              "contextWindowSize": "10",
+              "database": "dpd0",
+              "datasource": {
+                "type": "vertamedia-clickhouse-datasource",
+                "uid": "ds-scout-altinity-ch"
+              },
+              "dateTimeColDataType": "TimeUnix",
+              "dateTimeType": "DATETIME64",
+              "editorMode": "sql",
+              "extrapolate": true,
+              "format": "time_series",
+              "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "nullifySparse": false,
+              "query": "SELECT\ntoStartOfInterval(TimeUnix, INTERVAL 5 MINUTE) AS t,\navg(Sum) AS avg_disk_used_percent\nFROM $table\nWHERE $timeFilter\nAND ServiceName = 'awsfirehose/metrics'\nAND Attributes['Namespace'] = 'CWAgent'\nAND MetricName = 'CWAgent/disk_used_percent'\nAND Attributes['Dimensions.AutoScalingGroupName'] = 'Infra-ECS-Cluster-internalprod-finmo-949544de-ECSAutoScalingGroup-faSHjEK1lP68'\n  AND Attributes['Dimensions.path'] = '/'\nGROUP BY t\nORDER BY t DESC\n",
+              "range": true,
+              "refId": "A",
+              "round": "0s",
+              "skip_comments": true,
+              "table": "otel_metrics_summary",
+              "useWindowFuncForMacros": true
+            },
+            "refId": "A",
+            "relativeTimeRange": {
+              "from": 300
+            }
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [
+                      80
+                    ],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "B"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "A",
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "reducer": "last",
+              "refId": "B",
+              "settings": {
+                "mode": ""
+              },
+              "type": "reduce"
+            },
+            "refId": "B",
+            "relativeTimeRange": {}
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [
+                      0
+                    ],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "C"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "B",
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "refId": "C",
+              "type": "threshold"
+            },
+            "refId": "C",
+            "relativeTimeRange": {}
+          }
+        ],
+        "execErrState": "Error",
+        "folderUID": "cerld86lggqv4b",
+        "for": "5m0s",
+        "id": 123,
+        "noDataState": "NoData",
+        "notification_settings": {
+          "group_by": null,
+          "mute_time_intervals": null,
+          "receiver": "grafana-default-email"
+        },
+        "orgID": 1,
+        "ruleGroup": "Bender Disk Usage",
+        "title": "Bender Disk Usage",
+        "uid": "deybh32jykgsge",
+        "updated": "2025-09-18T02:35:18.000Z"
+      }
+    ],
+    "title": "Bender Disk Usage"
+  }
+}

@@ -1,0 +1,153 @@
+{
+  "apiVersion": "grizzly.grafana.com/v1alpha1",
+  "kind": "AlertRuleGroup",
+  "metadata": {
+    "name": "aetnzkzm0a874a.PerMinuteEval"
+  },
+  "spec": {
+    "folderUid": "aetnzkzm0a874a",
+    "interval": 60,
+    "rules": [
+      {
+        "annotations": {
+          "__dashboardUid__": "7f30c0cd-0fde-4ca0-ba80-460149c7b99a",
+          "__panelId__": "14"
+        },
+        "condition": "C",
+        "data": [
+          {
+            "datasourceUid": "ds-scout-altinity-ch",
+            "model": {
+              "adHocFilters": [],
+              "adHocValuesQuery": "",
+              "add_metadata": true,
+              "contextWindowSize": "10",
+              "database": "dpd0",
+              "datasource": {
+                "type": "vertamedia-clickhouse-datasource",
+                "uid": "ds-scout-altinity-ch"
+              },
+              "dateTimeColDataType": "TimeUnix",
+              "dateTimeType": "DATETIME64",
+              "editorMode": "sql",
+              "extrapolate": true,
+              "format": "time_series",
+              "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "nullifySparse": false,
+              "query": "$increase(Value)\nFROM $table \nWHERE $timeFilter AND\nServiceName ='postgres/app-finmo-db' AND\nMetricName='postgresql.deadlocks'\n",
+              "range": true,
+              "rawQuery": "/* grafana dashboard=$__dashboard, user='3' */\nSELECT t, if((max_0 - lagInFrame(max_0,1,0) OVER ()) \u003c 0, 0, max_0 - lagInFrame(max_0,1,0) OVER ()) AS max_0_Increase FROM ( SELECT (intDiv(toFloat64(TimeUnix) * 1000, (300 * 1000)) * (300 * 1000)) AS t, max(Value) AS max_0 FROM dpd0.otel_metrics_sum \nWHERE TimeUnix \u003e= toDateTime64(1757757826,3) AND TimeUnix \u003c= toDateTime64(1757930626,3) AND TimeUnix \u003e= toDateTime64(1757757826,3) AND TimeUnix \u003c= toDateTime64(1757930626,3) AND\nServiceName ='postgres/app-finmo-db' AND\nMetricName='postgresql.deadlocks' GROUP BY t ORDER BY t)",
+              "refId": "A",
+              "round": "0s",
+              "skip_comments": true,
+              "table": "otel_metrics_sum",
+              "useWindowFuncForMacros": true
+            },
+            "refId": "A",
+            "relativeTimeRange": {
+              "from": 300
+            }
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "B"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "A",
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "reducer": "last",
+              "refId": "B",
+              "type": "reduce"
+            },
+            "refId": "B",
+            "relativeTimeRange": {}
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [
+                      0
+                    ],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "C"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "B",
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "refId": "C",
+              "type": "threshold"
+            },
+            "refId": "C",
+            "relativeTimeRange": {}
+          }
+        ],
+        "execErrState": "Error",
+        "folderUID": "aetnzkzm0a874a",
+        "for": "1m0s",
+        "id": 55,
+        "noDataState": "NoData",
+        "notification_settings": {
+          "group_by": null,
+          "mute_time_intervals": null,
+          "receiver": "grafana-default-email"
+        },
+        "orgID": 1,
+        "ruleGroup": "PerMinuteEval",
+        "title": "postgresql deadlocks \u003e 1",
+        "uid": "dey537xvyz1fkd",
+        "updated": "2025-09-17T10:54:45.000Z"
+      }
+    ],
+    "title": "PerMinuteEval"
+  }
+}

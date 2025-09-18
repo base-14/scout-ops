@@ -1,0 +1,1353 @@
+{
+  "apiVersion": "grizzly.grafana.com/v1alpha1",
+  "kind": "AlertRuleGroup",
+  "metadata": {
+    "name": "cerld86lggqv4b.Per5MinEval"
+  },
+  "spec": {
+    "folderUid": "cerld86lggqv4b",
+    "interval": 300,
+    "rules": [
+      {
+        "condition": "C",
+        "data": [
+          {
+            "datasourceUid": "ds-scout-altinity-ch",
+            "model": {
+              "adHocFilters": [],
+              "adHocValuesQuery": "",
+              "add_metadata": true,
+              "contextWindowSize": "10",
+              "database": "dpd0",
+              "datasource": {
+                "type": "vertamedia-clickhouse-datasource",
+                "uid": "ds-scout-altinity-ch"
+              },
+              "dateTimeColDataType": "TimeUnix",
+              "dateTimeType": "DATETIME64",
+              "editorMode": "sql",
+              "extrapolate": true,
+              "format": "time_series",
+              "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+              "instant": false,
+              "intervalFactor": 1,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "nullifySparse": false,
+              "query": "SELECT\ntoStartOfInterval(TimeUnix, INTERVAL 5 MINUTE) AS t,\navg(Sum) AS avg_disk_used_percent\nFROM $table\nWHERE $timeFilter\nAND ServiceName = 'awsfirehose/metrics'\nAND Attributes['Namespace'] = 'CWAgent'\nAND MetricName = 'CWAgent/disk_used_percent'\nAND Attributes['Dimensions.AutoScalingGroupName'] = 'Infra-ECS-Cluster-internalprod-finmo-949544de-ECSAutoScalingGroup-faSHjEK1lP68'\n  AND Attributes['Dimensions.path'] = '/'\nGROUP BY t\nORDER BY t DESC\n",
+              "range": true,
+              "refId": "A",
+              "table": "otel_metrics_summary"
+            },
+            "refId": "A",
+            "relativeTimeRange": {
+              "from": 300
+            }
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [
+                      80
+                    ],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "B"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "A",
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "reducer": "last",
+              "refId": "B",
+              "settings": {
+                "mode": ""
+              },
+              "type": "reduce"
+            },
+            "refId": "B",
+            "relativeTimeRange": {}
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [
+                      0
+                    ],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "C"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "B",
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "refId": "C",
+              "type": "threshold"
+            },
+            "refId": "C",
+            "relativeTimeRange": {}
+          }
+        ],
+        "execErrState": "Error",
+        "folderUID": "cerld86lggqv4b",
+        "for": "5m0s",
+        "id": 122,
+        "isPaused": true,
+        "noDataState": "NoData",
+        "orgID": 1,
+        "ruleGroup": "Per5MinEval",
+        "title": "Bender Disk Usage",
+        "uid": "ceybh32fq0xkwa",
+        "updated": "2025-09-18T02:37:52.000Z"
+      },
+      {
+        "condition": "B",
+        "data": [
+          {
+            "datasourceUid": "ds-scout-altinity-ch",
+            "model": {
+              "adHocFilters": [],
+              "adHocValuesQuery": "",
+              "add_metadata": true,
+              "contextWindowSize": "10",
+              "database": "dpd0",
+              "datasource": {
+                "type": "vertamedia-clickhouse-datasource",
+                "uid": "ds-scout-altinity-ch"
+              },
+              "dateTimeColDataType": "TimeUnix",
+              "dateTimeType": "DATETIME64",
+              "editorMode": "sql",
+              "extrapolate": true,
+              "format": "table",
+              "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "nullifySparse": false,
+              "query": "SELECT if (countIf(low_memory_condition OR high_swap_condition) \u003e=2 , 1, 0) as alert_state\nFROM(\n  SELECT \n  toStartOfInterval(TimeUnix, INTERVAL 6 HOUR) AS t,\n  \n  avgIf(Sum, MetricName = 'AWS/RDS/FreeableMemory') AS freeable_memory_bytes,\n  \n  maxIf(Sum, MetricName = 'AWS/RDS/SwapUsage') AS swap_usage_bytes,\n  \n  if(freeable_memory_bytes \u003c 10737418240, 1, 0) AS low_memory_condition,\n  \n  if( swap_usage_bytes \u003e 4294967296, 1, 0) AS high_swap_condition\n\n  FROM $table\n  WHERE $timeFilter\n    AND ServiceName = 'awsfirehose/metrics'\n    AND Attributes['Namespace'] = 'AWS/RDS'\n    AND MetricName IN ('AWS/RDS/FreeableMemory', 'AWS/RDS/SwapUsage')\n    AND Attributes['Dimensions.DBInstanceIdentifier'] = 'app-finmo-db'\n  GROUP BY t\n  ORDER BY t DESC\n  LIMIT 3\n)\n",
+              "range": true,
+              "refId": "A",
+              "round": "0s",
+              "skip_comments": true,
+              "table": "otel_metrics_summary",
+              "useWindowFuncForMacros": true
+            },
+            "refId": "A",
+            "relativeTimeRange": {
+              "from": 64800
+            }
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [
+                      0
+                    ],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "B"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "A",
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "refId": "B",
+              "type": "threshold"
+            },
+            "refId": "B",
+            "relativeTimeRange": {}
+          }
+        ],
+        "execErrState": "Error",
+        "folderUID": "cerld86lggqv4b",
+        "for": "5m0s",
+        "id": 111,
+        "noDataState": "Alerting",
+        "orgID": 1,
+        "ruleGroup": "Per5MinEval",
+        "title": "RDS App-Finmo-DB MemoryPressure",
+        "uid": "dey76z9ftqgowb",
+        "updated": "2025-09-18T02:37:52.000Z"
+      },
+      {
+        "condition": "B",
+        "data": [
+          {
+            "datasourceUid": "ds-scout-altinity-ch",
+            "model": {
+              "adHocFilters": [],
+              "adHocValuesQuery": "",
+              "add_metadata": true,
+              "contextWindowSize": "10",
+              "database": "dpd0",
+              "datasource": {
+                "type": "vertamedia-clickhouse-datasource",
+                "uid": "ds-scout-altinity-ch"
+              },
+              "dateTimeColDataType": "TimeUnix",
+              "dateTimeType": "DATETIME64",
+              "editorMode": "sql",
+              "extrapolate": true,
+              "format": "table",
+              "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "nullifySparse": false,
+              "query": "SELECT \nif(countIf(max_transaction_ids \u003e 250000000) \u003e= 2, 1, 0) AS alert_state\nFROM (\n  SELECT \n      toStartOfInterval(TimeUnix, INTERVAL 5 MINUTE) as t ,\n      max(Sum) AS max_transaction_ids\n  FROM $table\n  WHERE TimeUnix \u003e= now() - INTERVAL 15 MINUTE\n    AND ServiceName = 'awsfirehose/metrics'\n    AND Attributes['Namespace'] = 'AWS/RDS'\n    AND MetricName = 'AWS/RDS/MaximumUsedTransactionIDs'\n    AND Attributes['Dimensions.DBInstanceIdentifier'] = 'app-finmo-db'\n  GROUP BY t\n  ORDER BY t DESC\n  LIMIT 3\n)\n",
+              "range": true,
+              "refId": "A",
+              "round": "0s",
+              "skip_comments": true,
+              "table": "otel_metrics_summary",
+              "useWindowFuncForMacros": true
+            },
+            "refId": "A",
+            "relativeTimeRange": {
+              "from": 900
+            }
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [
+                      0
+                    ],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "B"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "A",
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "refId": "B",
+              "type": "threshold"
+            },
+            "refId": "B",
+            "relativeTimeRange": {}
+          }
+        ],
+        "execErrState": "Error",
+        "folderUID": "cerld86lggqv4b",
+        "for": "5m0s",
+        "id": 107,
+        "noDataState": "NoData",
+        "orgID": 1,
+        "ruleGroup": "Per5MinEval",
+        "title": "RDS App-Finmo-DB MaximumUsedTransactionIDs",
+        "uid": "bey74gzhxezgga",
+        "updated": "2025-09-18T02:37:52.000Z"
+      },
+      {
+        "condition": "C",
+        "data": [
+          {
+            "datasourceUid": "ds-scout-altinity-ch",
+            "model": {
+              "adHocFilters": [],
+              "adHocValuesQuery": "",
+              "add_metadata": true,
+              "contextWindowSize": "10",
+              "database": "dpd0",
+              "datasource": {
+                "type": "vertamedia-clickhouse-datasource",
+                "uid": "ds-scout-altinity-ch"
+              },
+              "dateTimeColDataType": "TimeUnix",
+              "dateTimeType": "DATETIME64",
+              "editorMode": "sql",
+              "extrapolate": true,
+              "format": "time_series",
+              "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "nullifySparse": false,
+              "query": "SELECT \ntoStartOfInterval(TimeUnix, INTERVAL 15 MINUTE) AS time,\navg(Sum) AS free_storage_space\nFROM $table\nWHERE $timeFilter\n  AND ServiceName = 'awsfirehose/metrics'\n  AND Attributes['Namespace'] = 'AWS/RDS'\n  AND MetricName = 'AWS/RDS/FreeStorageSpace'\n  AND Attributes['Dimensions.DBInstanceIdentifier'] = 'app-finmo-db'\nGROUP BY time\nORDER BY time DESC\n",
+              "range": true,
+              "refId": "A",
+              "round": "0s",
+              "skip_comments": true,
+              "table": "otel_metrics_summary",
+              "useWindowFuncForMacros": true
+            },
+            "refId": "A",
+            "relativeTimeRange": {
+              "from": 900
+            }
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "B"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "A",
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "reducer": "last",
+              "refId": "B",
+              "settings": {
+                "mode": ""
+              },
+              "type": "reduce"
+            },
+            "refId": "B",
+            "relativeTimeRange": {}
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [
+                      751619276800
+                    ],
+                    "type": "lt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "C"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "B",
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "refId": "C",
+              "type": "threshold"
+            },
+            "refId": "C",
+            "relativeTimeRange": {}
+          }
+        ],
+        "execErrState": "Error",
+        "folderUID": "cerld86lggqv4b",
+        "for": "5m0s",
+        "id": 101,
+        "noDataState": "NoData",
+        "orgID": 1,
+        "ruleGroup": "Per5MinEval",
+        "title": "RDS App-Finmo-DB FreeStorageSpace",
+        "uid": "bey71ebd1ps74a",
+        "updated": "2025-09-18T02:37:52.000Z"
+      },
+      {
+        "annotations": {
+          "description": "Increase in 400 requests"
+        },
+        "condition": "C",
+        "data": [
+          {
+            "datasourceUid": "ds-scout-altinity-ch",
+            "model": {
+              "adHocFilters": [],
+              "adHocValuesQuery": "",
+              "add_metadata": true,
+              "contextWindowSize": "10",
+              "database": "dpd0",
+              "datasource": {
+                "type": "vertamedia-clickhouse-datasource",
+                "uid": "ds-scout-altinity-ch"
+              },
+              "dateTimeColDataType": "TimeUnix",
+              "dateTimeType": "DATETIME64",
+              "editorMode": "sql",
+              "extrapolate": true,
+              "format": "time_series",
+              "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "nullifySparse": false,
+              "query": "SELECT \n$timeSeries AS t,\nsum(Count) AS onextel_400_requests\nFROM $table\nWHERE $timeFilter\n  AND ServiceName = 'awsfirehose/metrics'\n  AND Attributes['Namespace'] = 'Bakasura'\n  AND MetricName = 'Bakasura/Requests'\n  AND Attributes['Dimensions.HTTPStatusCode'] = '400'\n  AND Attributes['Dimensions.Provider'] = 'onextel'\nGROUP BY t\nORDER BY t\n",
+              "range": true,
+              "refId": "A",
+              "round": "0s",
+              "skip_comments": true,
+              "table": "otel_metrics_summary",
+              "useWindowFuncForMacros": true
+            },
+            "refId": "A",
+            "relativeTimeRange": {
+              "from": 300
+            }
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "B"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "A",
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "reducer": "last",
+              "refId": "B",
+              "settings": {
+                "mode": ""
+              },
+              "type": "reduce"
+            },
+            "refId": "B",
+            "relativeTimeRange": {}
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [
+                      50
+                    ],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "C"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "B",
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "refId": "C",
+              "type": "threshold"
+            },
+            "refId": "C",
+            "relativeTimeRange": {}
+          }
+        ],
+        "execErrState": "Error",
+        "folderUID": "cerld86lggqv4b",
+        "for": "5m0s",
+        "id": 99,
+        "noDataState": "NoData",
+        "orgID": 1,
+        "ruleGroup": "Per5MinEval",
+        "title": "Onextel IVR Failures",
+        "uid": "fey70so10odtse",
+        "updated": "2025-09-18T02:37:52.000Z"
+      },
+      {
+        "condition": "C",
+        "data": [
+          {
+            "datasourceUid": "ds-scout-altinity-ch",
+            "model": {
+              "adHocFilters": [],
+              "adHocValuesQuery": "",
+              "add_metadata": true,
+              "contextWindowSize": "10",
+              "database": "dpd0",
+              "datasource": {
+                "type": "vertamedia-clickhouse-datasource",
+                "uid": "ds-scout-altinity-ch"
+              },
+              "dateTimeColDataType": "TimeUnix",
+              "dateTimeType": "DATETIME64",
+              "editorMode": "sql",
+              "extrapolate": true,
+              "format": "table",
+              "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "nullifySparse": false,
+              "query": "SELECT \nt, \nif(\n    (if(exotel_q \u003e 1 AND exotel_200 \u003c 1, 1, 0) + if(onextel_q \u003e 1 AND onextel_200 \u003c 1, 1, 0)) \u003e 1\n    AND (toHour(t) + toMinute(t)/60.0 + 5.5 BETWEEN 8 AND 19),\n    1, 0\n) AS alert_state\nFROM (\n  SELECT \n      sumIf(Count, Attributes['Namespace'] = 'AWS/SQS' \n            AND MetricName = 'AWS/SQS/NumberOfMessagesSent'\n            AND Attributes['Dimensions.QueueName'] = 'app-bakasura-exotel-queue') AS exotel_q,\n      sumIf(Count, Attributes['Namespace'] = 'Bakasura' \n            AND MetricName = 'Bakasura/Requests'\n            AND Attributes['Dimensions.HTTPStatusCode'] = '200'\n            AND Attributes['Dimensions.Provider'] = 'exotel') AS exotel_200,\n      sumIf(Count, Attributes['Namespace'] = 'AWS/SQS'\n            AND MetricName = 'AWS/SQS/NumberOfMessagesSent' \n            AND Attributes['Dimensions.QueueName'] = 'app-bakasura-onextel-queue') AS onextel_q,\n      sumIf(Count, Attributes['Namespace'] = 'Bakasura'\n            AND MetricName = 'Bakasura/Requests'\n            AND Attributes['Dimensions.HTTPStatusCode'] = '200'\n            AND Attributes['Dimensions.Provider'] = 'onextel') AS onextel_200,\n      toStartOfInterval(TimeUnix, Interval 5 MINUTE) AS t\n  FROM $table\n  WHERE $timeFilter\n    AND ServiceName = 'awsfirehose/metrics'\n    AND (\n        (Attributes['Namespace'] = 'AWS/SQS' AND MetricName = 'AWS/SQS/NumberOfMessagesSent') OR\n        (Attributes['Namespace'] = 'Bakasura' AND MetricName = 'Bakasura/Requests')\n    )\n  GROUP BY t\n  ORDER BY t DESC\n)\n",
+              "range": true,
+              "refId": "A",
+              "round": "0s",
+              "skip_comments": true,
+              "table": "otel_metrics_summary",
+              "useWindowFuncForMacros": true
+            },
+            "refId": "A",
+            "relativeTimeRange": {
+              "from": 300
+            }
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "B"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "A",
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "reducer": "last",
+              "refId": "B",
+              "settings": {
+                "mode": ""
+              },
+              "type": "reduce"
+            },
+            "refId": "B",
+            "relativeTimeRange": {}
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [
+                      0
+                    ],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "C"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "B",
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "refId": "C",
+              "type": "threshold"
+            },
+            "refId": "C",
+            "relativeTimeRange": {}
+          }
+        ],
+        "execErrState": "Error",
+        "folderUID": "cerld86lggqv4b",
+        "for": "5m0s",
+        "id": 86,
+        "noDataState": "Alerting",
+        "orgID": 1,
+        "ruleGroup": "Per5MinEval",
+        "title": "Bakasura's Indigestion",
+        "uid": "fey6qhpi1migwb",
+        "updated": "2025-09-18T02:37:52.000Z"
+      },
+      {
+        "condition": "C",
+        "data": [
+          {
+            "datasourceUid": "ds-scout-altinity-ch",
+            "model": {
+              "adHocFilters": [],
+              "adHocValuesQuery": "",
+              "add_metadata": true,
+              "contextWindowSize": "10",
+              "database": "dpd0",
+              "datasource": {
+                "type": "vertamedia-clickhouse-datasource",
+                "uid": "ds-scout-altinity-ch"
+              },
+              "dateTimeColDataType": "TimeUnix",
+              "dateTimeType": "DATETIME64",
+              "editorMode": "sql",
+              "extrapolate": true,
+              "format": "time_series",
+              "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+              "instant": false,
+              "intervalFactor": 1,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "nullifySparse": false,
+              "query": "SELECT \nt, \nif(\n    (avg_ready / if(avg_total \u003c 1, 1, avg_total) \u003e= 0.98) \n    AND ((toHour(t) + 6) % 24 \u003c 9),\n    1, \n    0\n) AS alert_state\nFROM (\n  SELECT \n      avgIf(Count, MetricName = 'AWS/AmazonMQ/MessageReadyCount') AS avg_ready,\n      avgIf(Count, MetricName = 'AWS/AmazonMQ/MessageCount') AS avg_total,\n      any(TimeUnix) AS t\n  FROM $table\n  WHERE $timeFilter\n    AND ServiceName = 'awsfirehose/metrics'\n    AND Attributes['Namespace'] = 'AWS/AmazonMQ'\n    AND MetricName IN ('AWS/AmazonMQ/MessageReadyCount', 'AWS/AmazonMQ/MessageCount')\n    AND Attributes['Dimensions.Broker'] = 'app-finmo-rabbitmq'\n    AND Attributes['Dimensions.VirtualHost'] = '/'\n    AND Attributes['Dimensions.Queue'] = 'ivr_tasks'\n)\n",
+              "range": true,
+              "refId": "A",
+              "table": "otel_metrics_summary"
+            },
+            "refId": "A",
+            "relativeTimeRange": {
+              "from": 300
+            }
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "B"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "A",
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "reducer": "last",
+              "refId": "B",
+              "settings": {
+                "mode": ""
+              },
+              "type": "reduce"
+            },
+            "refId": "B",
+            "relativeTimeRange": {}
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [
+                      0
+                    ],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "C"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "B",
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "refId": "C",
+              "type": "threshold"
+            },
+            "refId": "C",
+            "relativeTimeRange": {}
+          }
+        ],
+        "execErrState": "Error",
+        "folderUID": "cerld86lggqv4b",
+        "for": "5m0s",
+        "id": 80,
+        "isPaused": true,
+        "noDataState": "Alerting",
+        "orgID": 1,
+        "ruleGroup": "Per5MinEval",
+        "title": "App-Finmo IVR Unprocessed Messages Ratio",
+        "uid": "aey6oq7xr20w0c",
+        "updated": "2025-09-18T02:37:52.000Z"
+      },
+      {
+        "annotations": {
+          "description": "Alert \nany one of the fargate or ec2 service is down please check it once"
+        },
+        "condition": "C",
+        "data": [
+          {
+            "datasourceUid": "ds-scout-altinity-ch",
+            "model": {
+              "adHocFilters": [],
+              "adHocValuesQuery": "",
+              "add_metadata": true,
+              "contextWindowSize": "10",
+              "database": "dpd0",
+              "datasource": {
+                "type": "vertamedia-clickhouse-datasource",
+                "uid": "ds-scout-altinity-ch"
+              },
+              "dateTimeColDataType": "TimeUnix",
+              "dateTimeType": "DATETIME64",
+              "editorMode": "sql",
+              "extrapolate": true,
+              "format": "time_series",
+              "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "nullifySparse": false,
+              "query": "SELECT \nt,\nif(\n    (coalesce(webhook_ec2 + webhook, 0) \u003e 0 AND coalesce(api_ec2 + api, 0) \u003e 0) AND\n    (coalesce(beat_ec2 + beat, 0) \u003e 0 AND \n     coalesce(longday + night, 0) \u003e 0 AND \n     coalesce(day + night, 0) \u003e 0),\n    0, 1\n)   \nAS alert_state\n\nFROM (\n  SELECT \n     toStartOfInterval(TimeUnix , INTERVAL 2 MINUTE) as t,\n      avgIf(Count, Attributes['Dimensions.service_name'] = 'app-finmo-webhooks-appvpc-ec2') AS webhook_ec2,\n      avgIf(Count, Attributes['Dimensions.service_name'] = 'app-finmo-webhooks-appvpc') AS webhook,\n      avgIf(Count, Attributes['Dimensions.service_name'] = 'app-finmo-api-appvpc-ec2') AS api_ec2,\n      avgIf(Count, Attributes['Dimensions.service_name'] = 'app-finmo-api-appvpc') AS api,\n      avgIf(Count, Attributes['Dimensions.service_name'] = 'app-finmo-beat-appvpc-ec2') AS beat_ec2,\n      avgIf(Count, Attributes['Dimensions.service_name'] = 'app-finmo-beat-appvpc') AS beat,\n      avgIf(Count, Attributes['Dimensions.service_name'] = 'app-finmo-longdayworker-appvpc-ec2') AS longday,\n      avgIf(Count, Attributes['Dimensions.service_name'] = 'app-finmo-night-worker-appvpc-ec2') AS night,\n      avgIf(Count, Attributes['Dimensions.service_name'] = 'app-finmo-dayworker-appvpc-ec2') AS day\n  FROM $table\n  WHERE $timeFilter\n    AND ServiceName = 'awsfirehose/metrics'\n    AND Attributes['Namespace'] = 'app-finmo-devops'\n    AND MetricName = 'app-finmo-devops/ecs_running_count'\n  GROUP BY t\n  ORDER BY t\n)\n",
+              "range": true,
+              "rawQuery": "/* grafana dashboard=$__dashboard, user=$__user */\nSELECT \nt,\nif(\n    (coalesce(webhook_ec2 + webhook, 0) \u003e 0 AND coalesce(api_ec2 + api, 0) \u003e 0) AND\n    (coalesce(beat_ec2 + beat, 0) \u003e 0 AND \n     coalesce(longday + night, 0) \u003e 0 AND \n     coalesce(day + night, 0) \u003e 0),\n    0, 1\n)   \nAS alert_state\n\nFROM (\n  SELECT \n     toStartOfInterval(TimeUnix , INTERVAL 2 MINUTE) as t,\n      avgIf(Count, Attributes['Dimensions.service_name'] = 'app-finmo-webhooks-appvpc-ec2') AS webhook_ec2,\n      avgIf(Count, Attributes['Dimensions.service_name'] = 'app-finmo-webhooks-appvpc') AS webhook,\n      avgIf(Count, Attributes['Dimensions.service_name'] = 'app-finmo-api-appvpc-ec2') AS api_ec2,\n      avgIf(Count, Attributes['Dimensions.service_name'] = 'app-finmo-api-appvpc') AS api,\n      avgIf(Count, Attributes['Dimensions.service_name'] = 'app-finmo-beat-appvpc-ec2') AS beat_ec2,\n      avgIf(Count, Attributes['Dimensions.service_name'] = 'app-finmo-beat-appvpc') AS beat,\n      avgIf(Count, Attributes['Dimensions.service_name'] = 'app-finmo-longdayworker-appvpc-ec2') AS longday,\n      avgIf(Count, Attributes['Dimensions.service_name'] = 'app-finmo-night-worker-appvpc-ec2') AS night,\n      avgIf(Count, Attributes['Dimensions.service_name'] = 'app-finmo-dayworker-appvpc-ec2') AS day\n  FROM dpd0.otel_metrics_summary\n  WHERE TimeUnix \u003e= toDateTime64(1757971077,3) AND TimeUnix \u003c= toDateTime64(1757971377,3)\n    AND ServiceName = 'awsfirehose/metrics'\n    AND Attributes['Namespace'] = 'app-finmo-devops'\n    AND MetricName = 'app-finmo-devops/ecs_running_count'\n  GROUP BY t\n  ORDER BY t\n)",
+              "refId": "A",
+              "round": "0s",
+              "skip_comments": true,
+              "table": "otel_metrics_summary",
+              "useWindowFuncForMacros": true
+            },
+            "refId": "A",
+            "relativeTimeRange": {
+              "from": 300
+            }
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [
+                      1
+                    ],
+                    "type": "eq"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "A"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "B",
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "refId": "C",
+              "type": "threshold"
+            },
+            "refId": "C",
+            "relativeTimeRange": {}
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [
+                      0,
+                      0
+                    ],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": []
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "avg"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "name": "Expression",
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "A",
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "reducer": "last",
+              "refId": "B",
+              "type": "reduce"
+            },
+            "refId": "B",
+            "relativeTimeRange": {}
+          }
+        ],
+        "execErrState": "Error",
+        "folderUID": "cerld86lggqv4b",
+        "for": "5m0s",
+        "id": 48,
+        "noDataState": "Alerting",
+        "orgID": 1,
+        "ruleGroup": "Per5MinEval",
+        "title": "Core ECS Services Uptime",
+        "uid": "cey4owv50jgu8b",
+        "updated": "2025-09-18T02:37:52.000Z"
+      },
+      {
+        "condition": "C",
+        "data": [
+          {
+            "datasourceUid": "ds-scout-altinity-ch",
+            "model": {
+              "adHocFilters": [],
+              "adHocValuesQuery": "",
+              "add_metadata": true,
+              "contextWindowSize": "10",
+              "database": "dpd0",
+              "datasource": {
+                "type": "vertamedia-clickhouse-datasource",
+                "uid": "ds-scout-altinity-ch"
+              },
+              "dateTimeColDataType": "TimeUnix",
+              "dateTimeType": "DATETIME64",
+              "editorMode": "sql",
+              "extrapolate": true,
+              "format": "table",
+              "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "nullifySparse": false,
+              "query": "SELECT \nif(\n    countIf(karix_601_count \u003e 1000) \u003e= 3,  \n    1, \n    0\n) AS alarm_state\nFROM (\nSELECT \n    toStartOfInterval(TimeUnix, INTERVAL 5 MINUTE) AS t,\n    sum(Count) AS karix_601_count\nFROM $table\nWHERE  $timeFilter \n  AND ServiceName = 'awsfirehose/metrics'\n  AND MetricName = 'app-finmo-devops/OutboundRequestTime'  \n  AND Attributes['Namespace'] = 'app-finmo-devops'\n  AND Attributes['Dimensions.OutboundAPI'] = 'karix_trigger_call'\n  AND Attributes['Dimensions.Method'] = 'GET'\n  AND Attributes['Dimensions.StatusCode'] = '601'\nGROUP BY t\nORDER BY t DESC\nLIMIT 3\n)  \n",
+              "range": true,
+              "rawQuery": "/* grafana dashboard=$__dashboard, user=$__user */\nSELECT \nif(\n    countIf(karix_601_count \u003e 1000) \u003e= 3,  \n    1, \n    0\n) AS alarm_state\nFROM (\nSELECT \n    toStartOfInterval(TimeUnix, INTERVAL 5 MINUTE) AS t,\n    sum(Count) AS karix_601_count\nFROM dpd0.otel_metrics_summary\nWHERE  TimeUnix \u003e= toDateTime64(1757971077,3) AND TimeUnix \u003c= toDateTime64(1757971377,3) \n  AND ServiceName = 'awsfirehose/metrics'\n  AND MetricName = 'app-finmo-devops/OutboundRequestTime'  \n  AND Attributes['Namespace'] = 'app-finmo-devops'\n  AND Attributes['Dimensions.OutboundAPI'] = 'karix_trigger_call'\n  AND Attributes['Dimensions.Method'] = 'GET'\n  AND Attributes['Dimensions.StatusCode'] = '601'\nGROUP BY t\nORDER BY t DESC\nLIMIT 3\n)",
+              "refId": "A",
+              "round": "0s",
+              "skip_comments": true,
+              "table": "otel_metrics_summary",
+              "useWindowFuncForMacros": true
+            },
+            "refId": "A",
+            "relativeTimeRange": {
+              "from": 900
+            }
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "B"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "A",
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "reducer": "last",
+              "refId": "B",
+              "settings": {
+                "mode": ""
+              },
+              "type": "reduce"
+            },
+            "refId": "B",
+            "relativeTimeRange": {}
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [
+                      1
+                    ],
+                    "type": "eq"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "C"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "B",
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "refId": "C",
+              "type": "threshold"
+            },
+            "refId": "C",
+            "relativeTimeRange": {}
+          }
+        ],
+        "execErrState": "Error",
+        "folderUID": "cerld86lggqv4b",
+        "for": "15m0s",
+        "id": 70,
+        "noDataState": "NoData",
+        "orgID": 1,
+        "ruleGroup": "Per5MinEval",
+        "title": "App-Finmo Exotel Karix Errors And Limits",
+        "uid": "bey6msxtp3pc0b",
+        "updated": "2025-09-18T02:37:52.000Z"
+      },
+      {
+        "annotations": {
+          "description": "CPU utilization exceed\\nThis alert triggers when the database CPU utilization exceeds 50%"
+        },
+        "condition": "C",
+        "data": [
+          {
+            "datasourceUid": "ds-scout-altinity-ch",
+            "model": {
+              "adHocFilters": [],
+              "adHocValuesQuery": "",
+              "add_metadata": true,
+              "contextWindowSize": "10",
+              "database": "dpd0",
+              "datasource": {
+                "type": "vertamedia-clickhouse-datasource",
+                "uid": "ds-scout-altinity-ch"
+              },
+              "dateTimeColDataType": "TimeUnix",
+              "dateTimeType": "DATETIME64",
+              "editorMode": "sql",
+              "extrapolate": true,
+              "format": "table",
+              "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "nullifySparse": false,
+              "query": "SELECT \nIF(\ncountIf(cpu_utilization \u003e 50 ) \u003e=3, 1, 0) as alert_state\nFROM (SELECT \ntoStartOfInterval(TimeUnix, INTERVAL 5 MINUTE) AS t,\navg(Sum) AS cpu_utilization\nFROM $table\nWHERE  $timeFilter\n  AND ServiceName = 'awsfirehose/metrics'  \n  AND Attributes['Namespace'] = 'AWS/RDS'\n  AND MetricName = 'AWS/RDS/CPUUtilization'\n  AND Attributes['Dimensions.DBInstanceIdentifier'] = 'app-finmo-db'\nGROUP BY t\n)\n",
+              "range": true,
+              "rawQuery": "SELECT \nIF(\ncountIf(cpu_utilization \u003e 50 ) \u003e=3, 1, 0) as alert_state\nFROM (SELECT \ntoStartOfInterval(TimeUnix, INTERVAL 5 MINUTE) AS t,\navg(Count) AS cpu_utilization\nFROM $table\nWHERE  $timeFilter\n  AND ServiceName = 'awsfirehose/metrics'  \n  AND Attributes['Namespace'] = 'AWS/RDS'\n  AND MetricName = 'AWS/RDS/CPUUtilization'\n  AND Attributes['Dimensions.DBInstanceIdentifier'] = 'app-finmo-db'\nGROUP BY t\n)\n",
+              "refId": "A",
+              "round": "0s",
+              "skip_comments": true,
+              "table": "otel_metrics_summary",
+              "useWindowFuncForMacros": true
+            },
+            "refId": "A",
+            "relativeTimeRange": {
+              "from": 1500
+            }
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [
+                      1
+                    ],
+                    "type": "eq"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "C"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "A",
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "refId": "C",
+              "type": "threshold"
+            },
+            "refId": "C",
+            "relativeTimeRange": {}
+          }
+        ],
+        "execErrState": "Error",
+        "folderUID": "cerld86lggqv4b",
+        "for": "5m0s",
+        "id": 59,
+        "isPaused": true,
+        "noDataState": "Alerting",
+        "orgID": 1,
+        "ruleGroup": "Per5MinEval",
+        "title": "DB CPU Utilization Exceeded",
+        "uid": "bey6ga6cd3vnka",
+        "updated": "2025-09-18T02:37:52.000Z"
+      },
+      {
+        "condition": "C",
+        "data": [
+          {
+            "datasourceUid": "ds-scout-altinity-ch",
+            "model": {
+              "adHocFilters": [],
+              "adHocValuesQuery": "",
+              "add_metadata": true,
+              "contextWindowSize": "10",
+              "database": "dpd0",
+              "datasource": {
+                "type": "vertamedia-clickhouse-datasource",
+                "uid": "ds-scout-altinity-ch"
+              },
+              "dateTimeColDataType": "TimeUnix",
+              "dateTimeType": "DATETIME64",
+              "editorMode": "sql",
+              "extrapolate": true,
+              "format": "time_series",
+              "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "nullifySparse": false,
+              "query": "SELECT \ntoStartOfInterval(TimeUnix, INTERVAL 3 MINUTE) AS t,\navg(Sum) AS cpu_utilization\nFROM $table\nWHERE $timeFilter\n  AND ServiceName = 'awsfirehose/metrics'\n  AND Attributes['Namespace'] = 'AWS/RDS'\n  AND MetricName = 'AWS/RDS/CPUUtilization'\n  AND Attributes['Dimensions.DBInstanceIdentifier'] = 'app-finmo-db'\nGROUP BY t\nORDER BY t DESC\nLIMIT 2\n",
+              "range": true,
+              "rawQuery": "SELECT \ntoStartOfInterval(TimeUnix, INTERVAL 3 MINUTE) AS t,\navg(Count) AS cpu_utilization\nFROM $table\nWHERE $timeFilter\n  AND ServiceName = 'awsfirehose/metrics'\n  AND Attributes['Namespace'] = 'AWS/RDS'\n  AND MetricName = 'AWS/RDS/CPUUtilization'\n  AND Attributes['Dimensions.DBInstanceIdentifier'] = 'app-finmo-db'\nGROUP BY t\nORDER BY t DESC\nLIMIT 2\n",
+              "refId": "A",
+              "round": "0s",
+              "skip_comments": true,
+              "table": "otel_metrics_summary",
+              "useWindowFuncForMacros": true
+            },
+            "refId": "A",
+            "relativeTimeRange": {
+              "from": 300
+            }
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "B"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "A",
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "reducer": "last",
+              "refId": "B",
+              "settings": {
+                "mode": ""
+              },
+              "type": "reduce"
+            },
+            "refId": "B",
+            "relativeTimeRange": {}
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [
+                      50
+                    ],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "C"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "B",
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "refId": "C",
+              "type": "threshold"
+            },
+            "refId": "C",
+            "relativeTimeRange": {}
+          }
+        ],
+        "execErrState": "Error",
+        "folderUID": "cerld86lggqv4b",
+        "for": "5m0s",
+        "id": 95,
+        "isPaused": true,
+        "noDataState": "NoData",
+        "orgID": 1,
+        "ruleGroup": "Per5MinEval",
+        "title": "RDS App-Finmo-DB CPU Utilization",
+        "uid": "aey6z417w62v4b",
+        "updated": "2025-09-18T02:37:52.000Z"
+      }
+    ],
+    "title": "Per5MinEval"
+  }
+}

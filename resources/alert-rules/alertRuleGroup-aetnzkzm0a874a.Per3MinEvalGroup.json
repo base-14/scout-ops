@@ -1,0 +1,155 @@
+{
+  "apiVersion": "grizzly.grafana.com/v1alpha1",
+  "kind": "AlertRuleGroup",
+  "metadata": {
+    "name": "aetnzkzm0a874a.Per3MinEvalGroup"
+  },
+  "spec": {
+    "folderUid": "aetnzkzm0a874a",
+    "interval": 180,
+    "rules": [
+      {
+        "annotations": {
+          "__dashboardUid__": "cb63e5c3-5c56-4497-8c47-2b88a2377097",
+          "__panelId__": "2",
+          "summary": "Intalk APIs returning non-200 status codes"
+        },
+        "condition": "FailureCountThreshold",
+        "data": [
+          {
+            "datasourceUid": "ds-scout-altinity-ch",
+            "model": {
+              "adHocFilters": [],
+              "adHocValuesQuery": "",
+              "add_metadata": true,
+              "contextWindowSize": "10",
+              "database": "dpd0",
+              "datasource": {
+                "type": "vertamedia-clickhouse-datasource",
+                "uid": "ds-scout-altinity-ch"
+              },
+              "dateTimeColDataType": "TimeUnix",
+              "dateTimeType": "DATETIME64",
+              "editorMode": "sql",
+              "extrapolate": true,
+              "format": "table",
+              "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "nullifySparse": false,
+              "query": "SELECT $timeSeries as t, count(Value), Attributes['OutboundAPI'] as endpoint, Attributes['StatusCode'] as status_code\nFROM $table \nWHERE $timeFilter \nAND ServiceName = 'finmo'\nAND MetricName = 'outbound_request_time'\nAND Attributes['Method'] = 'POST'\nAND Attributes['StatusCode'] not like '2%'\nAND ResourceAttributes['environment'] = 'production'\nAND endpoint like 'intalk_%'\nGROUP BY t, endpoint, status_code\nORDER BY t\n",
+              "range": true,
+              "rawQuery": "/* grafana dashboard=$__dashboard, user='6' */\nSELECT (intDiv(toFloat64(TimeUnix) * 1000, (5 * 1000)) * (5 * 1000)) as t, count(Value), Attributes['OutboundAPI'] as endpoint, Attributes['StatusCode'] as status_code\nFROM dpd0.otel_metrics_gauge \nWHERE TimeUnix \u003e= toDateTime64(1758092219,3) AND TimeUnix \u003c= toDateTime64(1758103019,3) \nAND ServiceName = 'finmo'\nAND MetricName = 'outbound_request_time'\nAND Attributes['Method'] = 'POST'\nAND Attributes['StatusCode'] not like '2%'\nAND ResourceAttributes['environment'] = 'production'\nAND endpoint like 'intalk_%'\nGROUP BY t, endpoint, status_code\nORDER BY t",
+              "refId": "Data",
+              "round": "0s",
+              "showFormattedSQL": false,
+              "skip_comments": true,
+              "table": "otel_metrics_gauge",
+              "useWindowFuncForMacros": true
+            },
+            "refId": "Data",
+            "relativeTimeRange": {
+              "from": 1800
+            }
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "B"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "sum"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "Data",
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "reducer": "sum",
+              "refId": "CurrentFailureCount",
+              "type": "reduce"
+            },
+            "refId": "CurrentFailureCount",
+            "relativeTimeRange": {}
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [
+                      0
+                    ],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "C"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "CurrentFailureCount",
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "refId": "FailureCountThreshold",
+              "type": "threshold"
+            },
+            "refId": "FailureCountThreshold",
+            "relativeTimeRange": {}
+          }
+        ],
+        "execErrState": "Error",
+        "folderUID": "aetnzkzm0a874a",
+        "for": "3m0s",
+        "id": 125,
+        "noDataState": "NoData",
+        "notification_settings": {
+          "group_by": null,
+          "mute_time_intervals": null,
+          "receiver": "IntalkSlack"
+        },
+        "orgID": 1,
+        "ruleGroup": "Per3MinEvalGroup",
+        "title": "Intalk API Errors",
+        "uid": "ceybwbm1nsgzkf",
+        "updated": "2025-09-18T06:17:53.000Z"
+      }
+    ],
+    "title": "Per3MinEvalGroup"
+  }
+}
